@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "SNV Admin",
+    "slug": "stix-admin",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "snvadmin",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#070707",
+    "android": {
+      "package": "com.stixnvibes.admin",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#070707",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "permissions": ["CAMERA"],
+      "blockedPermissions": ["android.permission.RECORD_AUDIO"],
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "SNV Admin uses your photos for product, blog and library pictures.",
+          "cameraPermission": "SNV Admin uses the camera to take product and stall photos.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#070707",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 120
+        }
+      ],
+      "expo-font"
+    ],
+    "extra": {
+      "shopUrl": "https://shop.stixnvibes.com"
+    },
+    "experiments": {
+      "reactCompiler": true
+    }
+  }
+}
