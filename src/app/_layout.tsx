@@ -45,6 +45,7 @@ function Routes() {
         <Stack.Screen name="order/[number]" options={{ title: "Order" }} />
         <Stack.Screen name="packing" options={{ title: "Packing" }} />
         <Stack.Screen name="analytics" options={{ title: "Analytics" }} />
+        <Stack.Screen name="insights" options={{ title: "Insights" }} />
         <Stack.Screen name="customers/index" options={{ title: "Customers" }} />
         <Stack.Screen name="customers/[phone]" options={{ title: "Customer" }} />
         <Stack.Screen name="stalls/index" options={{ title: "Stalls" }} />

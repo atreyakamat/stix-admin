@@ -23,6 +23,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
     title: "Numbers",
     items: [
       { title: "Analytics", sub: "Visits, funnel, sources, codes, stock", icon: "bar-chart-2", href: "/analytics" },
+      { title: "Insights", sub: "Best stalls per hour, restock, repeat buyers", icon: "zap", href: "/insights" },
       { title: "Costs and goal", sub: "Unit costs and the profit goal", icon: "target", href: "/costs" },
     ],
   },

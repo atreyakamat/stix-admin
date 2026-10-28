@@ -1,6 +1,6 @@
 # SNV Admin
 
-The Stix N Vibes admin app for Android. It runs the shop from your phone: orders, packing and India Post tracking, an offline stall till, stalls and profit, costs and the money goal, analytics, products, offers and codes, custom requests, blog, gallery, college pages and settings.
+The Stix N Vibes admin app for Android. It runs the shop from your phone: orders, packing and India Post tracking, an offline stall till, stalls and profit, costs and the money goal, analytics and insights (best stalls per hour, restock, repeat buyers), products, offers and codes, custom requests, blog, gallery, college pages and settings.
 
 It talks to the shop at `shop.stixnvibes.com` through the admin app API (`/api/app/admin/*`, see `docs/ADMIN_APP_API.md` in the shop repo). Sign in with an admin email and the admin password. The app keeps a 30 day token in the phone's secure storage, never the password.
 

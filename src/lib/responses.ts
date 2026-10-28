@@ -49,6 +49,31 @@ export type Analytics = {
   productNames: Names;
   stalls: { cash: number; upi: number; total: number; count: number; profitPaise: number; topProducts: { productId: string; qty: number }[] };
 };
+export type StallRank = {
+  id: string;
+  name: string;
+  date: string;
+  venue: string;
+  collegeId: string | null;
+  sales: number;
+  revenuePaise: number;
+  profitPaise: number;
+  hours: number | null;
+  profitPerHourPaise: number | null;
+};
+export type InsightsRes = {
+  stalls: StallRank[];
+  venues: { key: string; venue: string; collegeId: string | null; stalls: number; profitPaise: number; avgProfitPaise: number; avgPerHourPaise: number | null }[];
+  restock: { id: string; name: string; image: string | null; stock: number; lowStockAt: number; sold: number; perWeek: number; daysLeft: number | null; suggest: number }[];
+  repeat: {
+    customers: number;
+    repeat: number;
+    rate: number;
+    repeatShare: number;
+    medianDaysToSecond: number | null;
+    top: { phone: string; name: string; orders: number; spentPaise: number; lastAt: string }[];
+  };
+};
 export type OrdersRes = { orders: Order[] };
 export type OrderRes = { order: Order; orderUrl: string; customerOrders: number };
 export type PackingRes = { toPack: Order[]; waiting: Order[]; shipped: Order[] };
