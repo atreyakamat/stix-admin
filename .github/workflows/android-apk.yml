@@ -6,14 +6,16 @@ name: Android APK
 # key. Without them the APK is signed with the debug key (fine for testing,
 # but you can't update it later with a release-signed build).
 
+# Pull requests build their branch; main builds on merge. One build per
+# branch at a time, so a new push cancels the older build.
 on:
   push:
-    branches: [main, "admin-app-*"]
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
 concurrency:
-  group: apk-${{ github.ref }}
+  group: apk-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:

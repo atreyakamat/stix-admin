@@ -8,7 +8,7 @@ Built with Expo SDK 58, React Native 0.88, expo-router and TanStack Query.
 
 ## Get the APK
 
-Every push to `main` or an `admin-app-*` branch builds an APK on GitHub Actions for free (no EAS):
+Every pull request and every push to `main` builds an APK on GitHub Actions for free (no EAS):
 
 1. Open **Actions → Android APK** and pick the latest green run.
 2. Download the `snv-admin-apk` artifact, unzip it and install the `.apk` on your phone (allow installs from your browser or file manager).
