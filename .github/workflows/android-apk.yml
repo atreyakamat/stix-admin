@@ -1,0 +1,87 @@
+name: Android APK
+
+# Builds the admin APK on GitHub's free runners. No EAS, no paid service.
+# Signing: add the ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD,
+# ANDROID_KEY_ALIAS and ANDROID_KEY_PASSWORD secrets to sign with your own
+# key. Without them the APK is signed with the debug key (fine for testing,
+# but you can't update it later with a release-signed build).
+
+# Pull requests build their branch; main builds on merge. One build per
+# branch at a time, so a new push cancels the older build.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: apk-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint, typecheck, test
+        run: npm run check
+
+      - name: Generate the Android project
+        run: npx expo prebuild --platform android --no-install
+        env:
+          EXPO_NO_TELEMETRY: 1
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build release APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Sign with the release key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          apk=android/app/build/outputs/apk/release/app-release.apk
+          mkdir -p out
+          name="snv-admin-${GITHUB_SHA::7}"
+          if [ -z "${KEYSTORE_BASE64}" ]; then
+            echo "::warning::No signing secrets, so this APK uses the debug key."
+            cp "$apk" "out/${name}-debugsigned.apk"
+            exit 0
+          fi
+          tools="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+          "$tools/zipalign" -f -p 4 "$apk" "$RUNNER_TEMP/aligned.apk"
+          "$tools/apksigner" sign \
+            --ks "$RUNNER_TEMP/release.keystore" \
+            --ks-pass env:KEYSTORE_PASSWORD \
+            --ks-key-alias "$KEY_ALIAS" \
+            --key-pass env:KEY_PASSWORD \
+            --out "out/${name}.apk" "$RUNNER_TEMP/aligned.apk"
+          "$tools/apksigner" verify "out/${name}.apk"
+          rm -f "$RUNNER_TEMP/release.keystore"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snv-admin-apk
+          path: out/*.apk
+          retention-days: 30
