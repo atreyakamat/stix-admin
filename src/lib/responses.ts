@@ -74,6 +74,33 @@ export type InsightsRes = {
     top: { phone: string; name: string; orders: number; spentPaise: number; lastAt: string }[];
   };
 };
+export type ReviewStatus = "pending" | "published" | "hidden";
+export type AdminReview = {
+  id: string;
+  productId: string;
+  orderNumber: string | null;
+  name: string;
+  instagram: string;
+  rating: number;
+  text: string;
+  photos: string[];
+  status: ReviewStatus;
+  reply: string;
+  repliedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  productName: string;
+  productImage: string | null;
+  photoUrls: string[];
+  customerPhone: string | null;
+};
+export type ReviewsRes = { status: ReviewStatus; counts: Record<ReviewStatus, number>; average: number | null; reviews: AdminReview[] };
+export type AlertsRes = {
+  now: string;
+  orders: { number: string; customerName: string; totalPaise: number; createdAt: string }[];
+  custom: { number: string; customerName: string; createdAt: string }[];
+  reviews: { id: string; name: string; rating: number; productName: string; createdAt: string }[];
+};
 export type OrdersRes = { orders: Order[] };
 export type OrderRes = { order: Order; orderUrl: string; customerOrders: number };
 export type PackingRes = { toPack: Order[]; waiting: Order[]; shipped: Order[] };

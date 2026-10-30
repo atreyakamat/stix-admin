@@ -8,11 +8,17 @@ name: Android APK
 
 # Pull requests build their branch; main builds on merge. One build per
 # branch at a time, so a new push cancels the older build.
+# A version tag (v1.2.0) also publishes a GitHub Release with the APK, a
+# download link that doesn't expire.
 on:
   push:
     branches: [main]
+    tags: ["v*"]
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 concurrency:
   group: apk-${{ github.head_ref || github.ref_name }}
@@ -41,6 +47,19 @@ jobs:
       - name: Lint, typecheck, test
         run: npm run check
 
+      # Every build gets a higher versionCode, so a new APK installs over the
+      # old one. A tag sets the version name the app shows (v1.2.0 -> 1.2.0).
+      - name: Set version
+        run: |
+          node -e '
+            const fs = require("fs");
+            const app = JSON.parse(fs.readFileSync("app.json", "utf8"));
+            app.expo.android.versionCode = 100 + Number(process.env.GITHUB_RUN_NUMBER);
+            if (process.env.GITHUB_REF_TYPE === "tag") app.expo.version = process.env.GITHUB_REF_NAME.replace(/^v/, "");
+            fs.writeFileSync("app.json", JSON.stringify(app, null, 2));
+            console.log(app.expo.version, app.expo.android.versionCode);
+          '
+
       - name: Generate the Android project
         run: npx expo prebuild --platform android --no-install
         env:
@@ -62,7 +81,7 @@ jobs:
           set -euo pipefail
           apk=android/app/build/outputs/apk/release/app-release.apk
           mkdir -p out
-          name="snv-admin-${GITHUB_SHA::7}"
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then name="snv-admin-${GITHUB_REF_NAME}"; else name="snv-admin-${GITHUB_SHA::7}"; fi
           if [ -z "${KEYSTORE_BASE64}" ]; then
             echo "::warning::No signing secrets, so this APK uses the debug key."
             cp "$apk" "out/${name}-debugsigned.apk"
@@ -85,3 +104,9 @@ jobs:
           name: snv-admin-apk
           path: out/*.apk
           retention-days: 30
+
+      - name: Publish the release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" out/*.apk --title "SNV Admin $GITHUB_REF_NAME" --generate-notes

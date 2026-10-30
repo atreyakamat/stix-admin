@@ -1,10 +1,12 @@
 import Constants from "expo-constants";
 import { router, type Href } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import { View } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, View } from "react-native";
+import { alertsOn, disableAlerts, enableAlerts } from "@/lib/alerts";
 import { useAuth } from "@/lib/auth";
 import { confirm } from "@/lib/queries";
-import { Gap, ListRow, Screen, Section, T, type IconName } from "@/ui/kit";
+import { Gap, ListRow, Screen, Section, T, Toggle, type IconName } from "@/ui/kit";
 import { space } from "@/ui/theme";
 
 type Item = { title: string; sub: string; icon: IconName; href?: Href; web?: string };
@@ -17,6 +19,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
       { title: "Stalls and profit", sub: "Every pop-up, its takings and costs", icon: "map-pin", href: "/stalls" },
       { title: "Customers", sub: "Who buys, how often, how much", icon: "users", href: "/customers" },
       { title: "Custom requests", sub: "Own-design orders", icon: "edit-3", href: "/custom" },
+      { title: "Reviews", sub: "Publish, hide and reply to customer reviews", icon: "star", href: "/reviews" },
     ],
   },
   {
@@ -53,6 +56,32 @@ const GROUPS: { title: string; items: Item[] }[] = [
   },
 ];
 
+function AlertsToggle() {
+  const [on, setOn] = useState<boolean | null>(null);
+  useEffect(() => {
+    alertsOn()
+      .then(setOn)
+      .catch(() => setOn(false));
+  }, []);
+  if (on === null) return null;
+  return (
+    <Toggle
+      label="Order alerts"
+      hint="New orders, custom requests and reviews, checked about every 15 minutes in the background."
+      value={on}
+      onChange={async (v) => {
+        if (!v) {
+          await disableAlerts();
+          return setOn(false);
+        }
+        const ok = await enableAlerts().catch(() => false);
+        if (!ok) Alert.alert("Notifications are off", "Allow notifications for SNV Admin in Android settings, then try again.");
+        setOn(ok);
+      }}
+    />
+  );
+}
+
 export default function More() {
   const { session, signOut } = useAuth();
   return (
@@ -77,7 +106,17 @@ export default function More() {
             {session?.email} · {session?.baseUrl.replace(/^https?:\/\//, "")}
             {session?.mode === "demo" ? " · demo data" : ""}
           </T.Mute>
-          <ListRow title="Log out" icon="log-out" onPress={() => confirm("Log out?", "Sales waiting to sync stay on the phone.", "Log out", signOut)} />
+          <AlertsToggle />
+          <ListRow
+            title="Log out"
+            icon="log-out"
+            onPress={() =>
+              confirm("Log out?", "Sales waiting to sync stay on the phone. Order alerts stop.", "Log out", async () => {
+                await disableAlerts().catch(() => undefined);
+                await signOut();
+              })
+            }
+          />
         </Section>
         <Gap />
         <T.Mute style={{ fontSize: 12 }}>SNV Admin {Constants.expoConfig?.version}</T.Mute>
