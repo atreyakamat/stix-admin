@@ -6,8 +6,10 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import "@/lib/alerts";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { queryClient } from "@/lib/queries";
+import { useAlerts } from "@/lib/use-alerts";
 import { c, font } from "@/ui/theme";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
@@ -24,6 +26,7 @@ function Routes() {
     [font.bold]: require("../../assets/fonts/BricolageGrotesque_700Bold.ttf"),
   });
   const loaded = ready && fontsLoaded;
+  useAlerts(loaded && !!session);
 
   useEffect(() => {
     if (loaded) SplashScreen.hideAsync().catch(() => undefined);
@@ -59,6 +62,7 @@ function Routes() {
         <Stack.Screen name="coupons/edit" options={{ title: "Code", presentation: "modal" }} />
         <Stack.Screen name="custom/index" options={{ title: "Custom requests" }} />
         <Stack.Screen name="custom/[number]" options={{ title: "Custom request" }} />
+        <Stack.Screen name="reviews" options={{ title: "Reviews" }} />
         <Stack.Screen name="blog/index" options={{ title: "Blog" }} />
         <Stack.Screen name="blog/[id]" options={{ title: "Post" }} />
         <Stack.Screen name="gallery" options={{ title: "Photo library" }} />
